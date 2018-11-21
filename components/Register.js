@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Button, Text } from 'react-native';
+import { StyleSheet, View, Button, Text, KeyboardAvoidingView, ScrollView } from 'react-native';
 import FetchFacade from '../rest/FetchFacade';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import t from 'tcomb-form-native';
@@ -40,26 +40,28 @@ class Register extends Component {
 
     render() {
         return (
-            <View style={styles.container}>
-                <Text style={styles.paragraph}>Register</Text>
-                {this.state.message ?
-                    this.state.message.error ? (
-                        <Text style={styles.paragraphRed}>{this.state.message.status}</Text>
-                    ) : (
-                            <Text style={styles.paragraphGreen}>{this.state.message.status}</Text>
-                        ) : (
-                        null
-                    )
-                }
-                <Form
-                    ref="form"
-                    type={User}
-                />
-                <Button
-                    title="Submit"
-                    onPress={this.handleRegister}
-                />
-            </View>
+            <KeyboardAwareScrollView style={{ flexGrow: 1, flexDirection: 'column' }}>
+                    <View style={styles.container}>
+                        <Text style={styles.paragraph}>Register</Text>
+                        {this.state.message ?
+                            this.state.message.error ? (
+                                <Text style={styles.paragraphRed}>{this.state.message.status}</Text>
+                            ) : (
+                                    <Text style={styles.paragraphGreen}>{this.state.message.status}</Text>
+                                ) : (
+                                null
+                            )
+                        }
+                        <Form
+                            ref="form"
+                            type={User}
+                        />
+                        <Button
+                            title="Submit"
+                            onPress={this.handleRegister}
+                        />
+                    </View>
+            </KeyboardAwareScrollView>
         );
     }
 }
@@ -79,14 +81,12 @@ const styles = StyleSheet.create({
         color: '#34495e',
     },
     paragraphGreen: {
-        margin: 24,
         fontSize: 18,
         fontWeight: 'bold',
         textAlign: 'center',
         color: '#008000',
     },
     paragraphRed: {
-        margin: 24,
         fontSize: 18,
         fontWeight: 'bold',
         textAlign: 'center',
