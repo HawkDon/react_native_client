@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Button, Text } from 'react-native';
+import { StyleSheet, View, Button, Text, ActivityIndicator, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { Constants, Location, Permissions } from 'expo';
 import FetchFacade from '../rest/FetchFacade';
 
@@ -15,42 +15,53 @@ const User = t.struct({
 class Login extends Component {
 
     state = {
-        errorMessage: null
+        errorMessage: null,
+        processing: false,
     }
 
-    handleLogin = async () => {
+    handleLogin = () => {
 
         // Get Form data
         const struct = this.refs.form.getValue();
         if (struct) {
-            // Convert t-comb to a normal object and send it to node
-            const user = {
-                username: struct.username,
-                password: struct.password,
-            }
-            // Get location
-            const location = await this.getGeoLocation();
-            const locationObject = JSON.parse(location);
+            this.setState({
+                processing: true,
+                errorMessage: null,
+            }, async () => {
+                const user = {
+                    username: struct.username,
+                    password: struct.password,
+                }
+                // Get location
+                const location = await this.getGeoLocation();
+                const locationObject = JSON.parse(location);
 
-            // Create our jsonPackage
-            const jsonPackage = {
-                user,
-                latitude: locationObject.latitude,
-                longitude: locationObject.longitude,
-            }
+                // Create our jsonPackage
+                const jsonPackage = {
+                    user,
+                    latitude: locationObject.latitude,
+                    longitude: locationObject.longitude,
+                }
 
-            // Backend call
-            const response = await FetchFacade.login(jsonPackage);
+                // Backend call
+                const response = await FetchFacade.login(jsonPackage);
 
-            if (response.error) {
-                this.setState({
-                    errorMessage: response.status
-                })
-            } else {
-                const { navigate } = this.props.navigation;
-                navigate('Home', {response: response});
-            }
+                if (response.error) {
+                    this.setState({
+                        errorMessage: response.status,
+                        processing: false
+                    })
+                } else {
+                    this.setState({
+                        processing: false
+                    }, () => {
+                        const { navigate } = this.props.navigation;
+                        navigate('Home', { response: response });
+                    })
+                }
+            })
         }
+
     }
 
     getGeoLocation = async () => {
@@ -66,19 +77,25 @@ class Login extends Component {
     }
 
     render() {
+        const { errorMessage, processing } = this.state;
         return (
-            <View style={styles.container}>
-                <Text style={styles.paragraph}>Login</Text>
-                {this.state.errorMessage ? <Text style={styles.paragraph}>{this.state.errorMessage}</Text> : null}
-                <Form
-                    ref="form"
-                    type={User}
-                />
-                <Button
-                    title="Submit"
-                    onPress={this.handleLogin}
-                />
-            </View>
+            <KeyboardAvoidingView style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }} behavior="padding" enabled keyboardVerticalOffset={100}>
+                <ScrollView>
+                    <View style={styles.container}>
+                        <Text style={styles.paragraph}>Login</Text>
+                        {processing ? <ActivityIndicator size="large" color="#00ff00" /> : null}
+                        {errorMessage ? <Text style={styles.paragraph}>{errorMessage}</Text> : null}
+                        <Form
+                            ref="form"
+                            type={User}
+                        />
+                        <Button
+                            title="Submit"
+                            onPress={this.handleLogin}
+                        />
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         );
     }
 }

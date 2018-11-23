@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Button, Text, KeyboardAvoidingView, ScrollView } from 'react-native';
+import { StyleSheet, View, Button, Text, ActivityIndicator, ScrollView, KeyboardAvoidingView } from 'react-native';
 import FetchFacade from '../rest/FetchFacade';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import t from 'tcomb-form-native';
 
 const Form = t.form.Form;
@@ -17,37 +16,47 @@ const User = t.struct({
 class Register extends Component {
 
     state = {
-        message: null
+        message: null,
+        processing: false,
     }
 
-    handleRegister = async () => {
+    handleRegister = () => {
         const struct = this.refs.form.getValue();
         if (struct) {
-            // Convert t-comb to a normal object and send it to node
-            const user = {
-                firstname: struct.firstname,
-                lastname: struct.lastname,
-                username: struct.username,
-                password: struct.password,
-                email: struct.email,
-            }
-            const message = await FetchFacade.register(user);
             this.setState({
-                message,
+                processing: true,
+                message: null,
+            }, async () => {
+                // Convert t-comb to a normal object and send it to node
+                const user = {
+                    firstname: struct.firstname,
+                    lastname: struct.lastname,
+                    username: struct.username,
+                    password: struct.password,
+                    email: struct.email,
+                }
+                const message = await FetchFacade.register(user);
+                this.setState({
+                    processing: false,
+                    message,
+                })
             })
         }
     }
 
     render() {
+        const { message, processing } = this.state;
         return (
-            <KeyboardAwareScrollView style={{ flexGrow: 1, flexDirection: 'column' }}>
+            <KeyboardAvoidingView style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }} behavior="padding" enabled keyboardVerticalOffset={100}>
+                <ScrollView>
                     <View style={styles.container}>
                         <Text style={styles.paragraph}>Register</Text>
-                        {this.state.message ?
-                            this.state.message.error ? (
-                                <Text style={styles.paragraphRed}>{this.state.message.status}</Text>
+                        {processing ? <ActivityIndicator size="large" color="#00ff00" /> : null}
+                        {message ?
+                            message.error ? (
+                                <Text style={styles.paragraphRed}>{message.status}</Text>
                             ) : (
-                                    <Text style={styles.paragraphGreen}>{this.state.message.status}</Text>
+                                    <Text style={styles.paragraphGreen}>{message.status}</Text>
                                 ) : (
                                 null
                             )
@@ -61,7 +70,8 @@ class Register extends Component {
                             onPress={this.handleRegister}
                         />
                     </View>
-            </KeyboardAwareScrollView>
+                </ScrollView>
+            </KeyboardAvoidingView>
         );
     }
 }
