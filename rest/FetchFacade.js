@@ -31,7 +31,7 @@ class FetchFacade {
     }
 
     updateUserPos = (jsonPackage) => {
-        return fetch("http://192.168.0.3:3000/api/updatePos", {
+        return fetch("https://secure-anchorage-97919.herokuapp.com/api/updatePos", {
             method: 'POST',
             body: JSON.stringify(jsonPackage),
             headers:{
