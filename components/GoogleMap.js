@@ -5,7 +5,7 @@ import FetchFacade from '../rest/FetchFacade';
 export default class GoogleMap extends Component {
 
     state = {
-        friends: []
+        friends: [],
     }
 
     async componentDidMount() {
@@ -16,17 +16,19 @@ export default class GoogleMap extends Component {
         })
     }
 
-    async componentDidUpdate(prevProps){
-        if(prevProps.latitude !== this.props.latitude || prevProps.longitude !== this.props.longitude) {
-            const friends = await FetchFacade.getAllFriends({ username: this.props.username });
-            this.setState({
-                friends,
-            })
+    async componentDidUpdate(prevProps) {
+        if (!this.props.didSearch) {
+            if (prevProps.latitude !== this.props.latitude || prevProps.longitude !== this.props.longitude) {
+                const friends = await FetchFacade.getAllFriends({ username: this.props.username });
+                this.setState({
+                    friends,
+                })
+            }
         }
     }
 
     render() {
-        const { latitude, longitude, username } = this.props;
+        const { latitude, longitude, username, didSearch, friendResponse } = this.props;
         const { friends } = this.state;
         return (
             <MapView
@@ -43,7 +45,15 @@ export default class GoogleMap extends Component {
                     coordinate={{ latitude: latitude, longitude: longitude }}
                     title={username}
                 />
-                {friends.map((friend, index) => (
+
+                {didSearch ? friendResponse.map((friend, index) => (
+                    <MapView.Marker
+                        key={index + 1}
+                        coordinate={{ longitude: friend.position[0], latitude: friend.position[1] }}
+                        title={friend.user}
+                        pinColor='blue'
+                    />
+                )) : friends.map((friend, index) => (
                     <MapView.Marker
                         key={index + 1}
                         coordinate={{ longitude: friend.position[0], latitude: friend.position[1] }}

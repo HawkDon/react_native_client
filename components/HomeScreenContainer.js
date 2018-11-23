@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TextInput, Button } from 'react-native';
+import { View, StyleSheet, TextInput, Button, ScrollView, KeyboardAvoidingView } from 'react-native';
 import HomeScreen from './HomeScreen';
+import FetchFacade from '../rest/FetchFacade';
 
 class HomeScreenContainer extends Component {
 
     state = {
-        response: {}
+        response: {},
+        inputValue: "",
+        friendResponse: [],
+        didSearch: false,
+        processing: false,
     }
 
     componentWillMount() {
@@ -17,26 +22,60 @@ class HomeScreenContainer extends Component {
 
     handleSearch = () => {
         // Handle search here
-        console.log("Button pressed")
+        const { inputValue, response } = this.state;
+        const username = response.payload.username
+        this.setState({
+            processing: true,
+        }, async () => {
+            const friendResponse = await FetchFacade.getFriendsWithinRange({ username: username, radius: parseInt(inputValue) })
+            this.setState({
+                friendResponse: friendResponse,
+                didSearch: true,
+                processing: false,
+            })
+        })
+    }
+
+    handleChange = (value) => {
+        this.setState({
+            inputValue: value
+        })
+    }
+
+    changeFriends = (friendResponse) => {
+        this.setState({
+            friendResponse: friendResponse
+        })
     }
 
     render() {
-        const { response } = this.state;
+        const { response, inputValue, friendResponse, didSearch, processing } = this.state;
         return (
-            <View style={styles.container}>
-                <HomeScreen
-                    response={response}
-                />
-                <TextInput
-                    placeholder="Type to filter radius(km)"
-                    style={styles.textInput}
-                    underlineColorAndroid="transparent"
-                />
-                <Button
-                    title="Søg efter venner"
-                    onPress={this.handleSearch}
-                />
-            </View>
+            <KeyboardAvoidingView style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }} behavior="padding" enabled keyboardVerticalOffset={100}>
+                <ScrollView>
+                    <View style={styles.container}>
+                        <HomeScreen
+                            response={response}
+                            friendResponse={friendResponse}
+                            didSearch={didSearch}
+                            processing={processing}
+                            changeFriends={this.changeFriends}
+                        />
+                        <TextInput
+                            placeholder="Type to filter radius(km)"
+                            style={styles.textInput}
+                            underlineColorAndroid="transparent"
+                            onChangeText={this.handleChange}
+                            value={inputValue}
+                        />
+                        <Button
+                            title="Søg efter venner"
+                            onPress={this.handleSearch}
+                            style={styles.buttonStyle}
+                        />
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         );
     }
 }
@@ -53,6 +92,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         margin: 20,
         padding: 5
+    },
+    buttonStyle: {
+        margin: 24,
+        padding: 24
     }
 });
 

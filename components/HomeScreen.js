@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Text, TextInput } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { Permissions, Location } from 'expo';
 import GoogleMap from './GoogleMap';
 import FetchFacade from '../rest/FetchFacade';
@@ -26,7 +26,7 @@ class HomeScreen extends Component {
         this.setState({
             response,
         }, () => {
-            // this.tick(response.payload.username);
+            this.tick(response.payload.username);
         })
     }
 
@@ -38,7 +38,7 @@ class HomeScreen extends Component {
             this.setState({
                 response,
             })
-        }, 3000);
+        }, 5000);
     }
 
 
@@ -57,13 +57,23 @@ class HomeScreen extends Component {
 
     render() {
         const { response } = this.state;
+        const { friendResponse, didSearch, processing, changeFriends } = this.props;
         return (
             <View>
                 <Text style={styles.paragraph}>{response.status}</Text>
+                {processing ? <ActivityIndicator size="large" color="#00ff00" /> : null}
+                {friendResponse.length ? friendResponse.length === 1 ? (
+                    <Text style={styles.paragraph}>Du har {friendResponse.length} ven i den her radius</Text>
+                ) : (
+                        <Text style={styles.paragraph}>Du har {friendResponse.length} venner i den her radius</Text>
+                    ) : null}
                 <GoogleMap
+                    changeFriends={changeFriends}
                     latitude={response.payload.latitude}
                     longitude={response.payload.longitude}
                     username={response.payload.username}
+                    friendResponse={friendResponse}
+                    didSearch={didSearch}
                 />
             </View>
         );
