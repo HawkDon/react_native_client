@@ -19,13 +19,13 @@ class HomeScreen extends Component {
 
     render() {
         const { response } = this.state;
-        console.log(response);
         return (
             <View style={styles.container}>
             <Text style={styles.paragraph}>{response.status}</Text>
                 <GoogleMap 
                 latitude={response.payload.latitude}
                 longitude={response.payload.longitude}
+                username={response.payload.username}
                 />
             </View>
         );
