@@ -15,6 +15,16 @@ export default class GoogleMap extends Component {
             friends
         })
     }
+
+    async componentDidUpdate(prevProps){
+        if(prevProps.latitude !== this.props.latitude || prevProps.longitude !== this.props.longitude) {
+            const friends = await FetchFacade.getAllFriends({ username: this.props.username });
+            this.setState({
+                friends,
+            })
+        }
+    }
+
     render() {
         const { latitude, longitude, username } = this.props;
         const { friends } = this.state;
@@ -38,6 +48,7 @@ export default class GoogleMap extends Component {
                         key={index + 1}
                         coordinate={{ longitude: friend.position[0], latitude: friend.position[1] }}
                         title={friend.user}
+                        pinColor='blue'
                     />
                 ))}
             </MapView>

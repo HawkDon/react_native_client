@@ -29,6 +29,16 @@ class FetchFacade {
             }
         }).then(res => res.json());
     }
+
+    updateUserPos = (jsonPackage) => {
+        return fetch("http://192.168.0.3:3000/api/updatePos", {
+            method: 'POST',
+            body: JSON.stringify(jsonPackage),
+            headers:{
+                'Content-Type': 'application/json'
+            }
+        }).then(res => res.json());
+    }
 }
 
 export default new FetchFacade();

@@ -1,5 +1,5 @@
 import React from 'react';
-import HomeScreen from './components/HomeScreen';
+import HomeScreenContainer from './components/HomeScreenContainer';
 import Login from './components/Login';
 import Register from './components/Register';
 import StartScreen from './components/StartScreen';
@@ -11,7 +11,7 @@ const AppNavigator = createStackNavigator({
     screen: StartScreen
   },
   Home: {
-    screen: HomeScreen,
+    screen: HomeScreenContainer,
   },
   Login: {
     screen: Login,
